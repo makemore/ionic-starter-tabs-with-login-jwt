@@ -47,26 +47,67 @@ angular.module('starter.services', [])
       return null;
     }
   };
-}).factory('LoginService', function($q) {
-    return {
-        loginUser: function(name, pw) {
-            var deferred = $q.defer();
-            var promise = deferred.promise;
+}).factory('LoginService', function ($q, $http, jwtHelper) {
+    var factory = {};
 
-            if (name == 'user' && pw == 'secret') {
-                deferred.resolve('Welcome ' + name + '!');
-            } else {
-                deferred.reject('Wrong credentials.');
-            }
-            promise.success = function(fn) {
-                promise.then(fn);
-                return promise;
-            };
-            promise.error = function(fn) {
-                promise.then(null, fn);
-                return promise;
-            };
-            return promise;
-        }
-    }
-});
+    factory.loginUser = function (name, pw) {
+      var deferred = $q.defer();
+      var promise = deferred.promise;
+
+      var url = "http://localhost:8000";
+
+      $http.post(url + "/api-token-auth/", {
+        "username": name,
+        password: pw
+      }).success(function (token) {
+        factory.token = token.token;
+        factory.decodedToken = jwtHelper.decodeToken(token.token);
+        factory.loggedIn = true;
+        deferred.resolve(token);
+      }).error(function () {
+        deferred.reject('Wrong credentials.');
+      });
+
+      promise.success = function (fn) {
+        promise.then(fn);
+        return promise;
+      };
+      promise.error = function (fn) {
+        promise.then(null, fn);
+        return promise;
+      };
+
+      return promise;
+    };
+
+    factory.createUser = function (name, email, pw) {
+      var deferred = $q.defer();
+      var promise = deferred.promise;
+
+      var url = "http://localhost:8000";
+
+      $http.post(url + "/create-user/", {
+        username: name,
+        email: email,
+        password: pw
+      }).success(function () {
+        deferred.resolve();
+      }).error(function () {
+        deferred.reject('Problem creating account');
+      });
+
+      promise.success = function (fn) {
+        promise.then(fn);
+        return promise;
+      };
+      promise.error = function (fn) {
+        promise.then(null, fn);
+        return promise;
+      };
+
+      return promise;
+    };
+
+    return factory;
+
+  });

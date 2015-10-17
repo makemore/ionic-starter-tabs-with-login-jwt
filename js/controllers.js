@@ -27,15 +27,36 @@ angular.module('starter.controllers', [])
   };
 }).controller('LoginCtrl', function ($scope, LoginService, $ionicPopup, $state) {
      $scope.data = {};
+    $scope.showCreate = false;
 
-    $scope.login = function() {
-        LoginService.loginUser($scope.data.username, $scope.data.password).success(function(data) {
-            $state.go('tab.dash');
-        }).error(function(data) {
-            var alertPopup = $ionicPopup.alert({
-                title: 'Login failed!',
-                template: 'Please check your credentials!'
-            });
+    $scope.login = function () {
+      LoginService.loginUser($scope.data.username, $scope.data.password).success(function (data) {
+        $state.go('tab.dash');
+      }).error(function (data) {
+        var alertPopup = $ionicPopup.alert({
+          title: 'Login failed!',
+          template: 'Please check your credentials!'
         });
-    }
+      });
+    };
+
+    $scope.createAccount = function(){
+      LoginService.createUser($scope.data.username, $scope.data.email, $scope.data.password).success(function (data) {
+        //$scope.data = data;
+        $scope.login();
+        //$scope.showCreate = false;
+      }).error(function (data) {
+        var alertPopup = $ionicPopup.alert({
+          title: 'Create account failed!',
+          template: 'Please check your credentials!'
+        });
+      });
+    };
+
+    $scope.showSignup = function () {
+      $scope.showCreate = true;
+    };
+    $scope.showLogin = function () {
+      $scope.showCreate = false;
+    };
   });
